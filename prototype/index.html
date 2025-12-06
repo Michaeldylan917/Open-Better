@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodDiary Prototype Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #f0f0f2;
+        }
+        
+        /* Simple iPhone Frame */
+        .device-frame {
+            width: 375px;
+            height: 812px;
+            background: black;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            position: relative;
+            border: 8px solid #1a1a1a;
+        }
+        
+        /* Notch */
+        .device-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 30px;
+            background: #1a1a1a;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 20;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body class="p-10">
+
+    <header class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">MoodDiary</h1>
+        <p class="text-gray-500">High-Fidelity Prototype Showcase</p>
+    </header>
+
+    <div class="flex flex-wrap justify-center gap-16">
+        
+        <!-- Home -->
+        <div class="flex flex-col items-center gap-4">
+            <h2 class="text-xl font-bold text-gray-700">1. Home / Calendar</h2>
+            <div class="device-frame">
+                <div class="screen">
+                    <iframe src="home.html"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editor -->
+        <div class="flex flex-col items-center gap-4">
+            <h2 class="text-xl font-bold text-gray-700">2. Log Mood</h2>
+            <div class="device-frame">
+                <div class="screen">
+                    <iframe src="editor.html"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex flex-col items-center gap-4">
+            <h2 class="text-xl font-bold text-gray-700">3. Stats Dashboard</h2>
+            <div class="device-frame">
+                <div class="screen">
+                    <iframe src="stats.html"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="flex flex-col items-center gap-4">
+            <h2 class="text-xl font-bold text-gray-700">4. Settings</h2>
+            <div class="device-frame">
+                <div class="screen">
+                    <iframe src="settings.html"></iframe>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodDiary - Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                    },
+                    colors: {
+                        bg: '#FAFAF9',
+                        card: '#FFFFFF',
+                        primary: '#333333',
+                        secondary: '#8E8E93',
+                        'mood-ecstatic': '#FFD166',
+                        'mood-happy': '#FFB7B2',
+                        'mood-neutral': '#E2F0CB',
+                        'mood-sad': '#B5EAD7',
+                        'mood-angry': '#FF9AA2',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bg text-primary font-sans h-screen overflow-hidden flex flex-col select-none">
+
+    <!-- Status Bar -->
+    <div class="h-12 flex justify-between items-center px-6 text-sm font-medium pt-2 z-50 bg-bg">
+        <span>9:41</span>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal text-xs"></i>
+            <i class="fas fa-wifi text-xs"></i>
+            <i class="fas fa-battery-full text-xs"></i>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="px-6 pt-2 pb-6">
+        <h1 class="text-2xl font-bold text-primary">设置</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto px-6 pb-24">
+        
+        <!-- Profile Section (Mock) -->
+        <div class="bg-white rounded-3xl p-5 shadow-sm mb-6 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full bg-mood-neutral flex items-center justify-center text-2xl">
+                🐻
+            </div>
+            <div class="flex-1">
+                <h2 class="text-lg font-bold">本地用户</h2>
+                <p class="text-xs text-secondary">数据仅存储在设备上</p>
+            </div>
+            <button class="text-sm font-bold text-primary border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">
+                编辑
+            </button>
+        </div>
+
+        <!-- General Settings -->
+        <h3 class="text-xs font-bold text-secondary uppercase tracking-wider mb-3 px-2">通用</h3>
+        <div class="bg-white rounded-3xl shadow-sm overflow-hidden mb-6">
+            <div class="flex items-center justify-between p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <span class="text-sm font-bold">应用锁</span>
+                </div>
+                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                    <label for="toggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                </div>
+            </div>
+            <div class="flex items-center justify-between p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <span class="text-sm font-bold">提醒</span>
+                </div>
+                <div class="flex items-center gap-2 text-secondary">
+                    <span class="text-xs">21:00</span>
+                    <i class="fas fa-chevron-right text-xs"></i>
+                </div>
+            </div>
+            <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <span class="text-sm font-bold">主题</span>
+                </div>
+                <div class="flex items-center gap-2 text-secondary">
+                    <span class="text-xs">默认 (Cream)</span>
+                    <i class="fas fa-chevron-right text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Settings -->
+        <h3 class="text-xs font-bold text-secondary uppercase tracking-wider mb-3 px-2">数据</h3>
+        <div class="bg-white rounded-3xl shadow-sm overflow-hidden mb-6">
+            <div class="flex items-center justify-between p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                        <i class="fas fa-file-export"></i>
+                    </div>
+                    <span class="text-sm font-bold">导出数据</span>
+                </div>
+                <i class="fas fa-chevron-right text-xs text-secondary"></i>
+            </div>
+            <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer group">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 group-hover:bg-red-100 transition-colors">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                    <span class="text-sm font-bold text-red-500">清除所有数据</span>
+                </div>
+            </div>
+        </div>
+        
+        <p class="text-center text-[10px] text-gray-300 mt-8">MoodDiary v1.0.0 (Offline Build)</p>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-100 pb-6 pt-3 px-8 flex justify-between items-center z-50">
+        <a href="home.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+            <i class="fas fa-home text-xl"></i>
+            <span class="text-[10px] font-medium">首页</span>
+        </a>
+        <a href="stats.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+            <i class="fas fa-chart-pie text-xl"></i>
+            <span class="text-[10px] font-medium">统计</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 text-primary">
+            <i class="fas fa-cog text-xl"></i>
+            <span class="text-[10px] font-medium">设置</span>
+        </a>
+    </nav>
+    
+    <style>
+        /* Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #E2F0CB; /* Sage Green */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #E2F0CB;
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+        .toggle-label {
+            width: 40px;
+        }
+    </style>
+
+</body>
+</html>

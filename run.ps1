@@ -3,7 +3,7 @@
 
 # ================== 可配置变量 ==================
 # 项目包名(根据实际项目包名修改!!!!!)  
-$BUNDLE_NAME = "com.example.Mood Journal Calendar"
+$BUNDLE_NAME = "com.example.moodjournalcalendar"
 # ================== 可配置变量 ==================
 
 # ================== 固定的变量 ==================
