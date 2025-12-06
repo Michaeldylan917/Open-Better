@@ -1,8 +1,24 @@
 {
   "float": [
     {
-      "name": "page_text_font_size",
-      "value": "50fp"
+      "name": "font_size_small",
+      "value": "12fp"
+    },
+    {
+      "name": "font_size_normal",
+      "value": "14fp"
+    },
+    {
+      "name": "font_size_large",
+      "value": "16fp"
+    },
+    {
+      "name": "font_size_xlarge",
+      "value": "20fp"
+    },
+    {
+      "name": "border_radius_medium",
+      "value": "16vp"
     }
   ]
 }

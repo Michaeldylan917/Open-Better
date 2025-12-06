@@ -10,7 +10,15 @@
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "Mood Diary"
+    },
+    {
+      "name": "app_name",
+      "value": "Mood Diary"
+    },
+    {
+      "name": "welcome_message",
+      "value": "Welcome to Mood Diary"
     }
   ]
 }

@@ -5,6 +5,10 @@
   "main": "",
   "author": "",
   "license": "",
-  "dependencies": {}
+  "dependencies": {
+    "@hadss/hmrouter": "^1.2.2",
+    "@hadss/hmrouter-transitions": "^1.2.2"
+  },
+  "devDependencies": {},
+  "dynamicDependencies": {}
 }
-

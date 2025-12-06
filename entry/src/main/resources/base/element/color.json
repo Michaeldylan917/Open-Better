@@ -3,6 +3,30 @@
     {
       "name": "start_window_background",
       "value": "#FFFFFF"
+    },
+    {
+      "name": "white",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "text_primary",
+      "value": "#333333"
+    },
+    {
+      "name": "text_secondary",
+      "value": "#8E8E93"
+    },
+    {
+      "name": "brand_primary",
+      "value": "#333333"
+    },
+    {
+      "name": "bg_primary",
+      "value": "#FAFAF9"
+    },
+    {
+      "name": "card_bg",
+      "value": "#FFFFFF"
     }
   ]
 }
