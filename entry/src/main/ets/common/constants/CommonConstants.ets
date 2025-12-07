@@ -12,4 +12,5 @@ export class CommonConstants {
   static readonly URL_TOOLS = 'ToolsPage';
   static readonly URL_STATS = 'StatsPage';
   static readonly URL_SETTINGS = 'SettingsPage';
+  static readonly URL_SEARCH = 'pages/SearchPage';
 }

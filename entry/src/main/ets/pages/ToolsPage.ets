@@ -29,6 +29,8 @@ export struct ToolsPage {
     text: '万物皆有裂痕，那是光照进来的地方。',
     author: '莱昂纳德·科恩'
   };
+  @State quoteOpacity: number = 1.0;
+  @State quoteScale: number = 1.0;
 
   private quotes: Quote[] = [
     { text: '万物皆有裂痕，那是光照进来的地方。', author: '莱昂纳德·科恩' },
@@ -581,8 +583,22 @@ export struct ToolsPage {
 
   // --- Quote Logic ---
   refreshQuote(): void {
-    const randomIndex = Math.floor(Math.random() * this.quotes.length);
-    this.currentQuote = this.quotes[randomIndex];
+    // Animate out
+    animateTo({ duration: 300, curve: Curve.EaseOut }, () => {
+      this.quoteOpacity = 0.0;
+      this.quoteScale = 0.95;
+    });
+
+    setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * this.quotes.length);
+      this.currentQuote = this.quotes[randomIndex];
+      
+      // Animate in
+      animateTo({ duration: 300, curve: Curve.EaseIn }, () => {
+        this.quoteOpacity = 1.0;
+        this.quoteScale = 1.0;
+      });
+    }, 300);
   }
 
   @Builder
@@ -620,6 +636,8 @@ export struct ToolsPage {
     .backdropBlur(10)
     .borderRadius(20)
     .shadow({ radius: 4, color: 'rgba(0,0,0,0.05)', offsetY: 2 })
+    .opacity(this.quoteOpacity)
+    .scale({ x: this.quoteScale, y: this.quoteScale })
     .onClick(() => this.refreshQuote())
   }
 }

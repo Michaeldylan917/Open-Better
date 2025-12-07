@@ -16,7 +16,7 @@ export struct Index {
   PageMap(name: string) {
     if (name === CommonConstants.URL_EDITOR) {
       MoodEditorPage()
-    } else if (name === 'pages/SearchPage') {
+    } else if (name === CommonConstants.URL_SEARCH) {
       SearchPage()
     }
   }
@@ -39,35 +39,68 @@ export struct Index {
     .width('100%')
   }
 
+  @Builder
+  PlaceholderTabBuilder() {
+    Column()
+      .width('100%')
+      .height('100%')
+  }
+
   build() {
     Navigation(this.pageStack) {
-      Tabs({ barPosition: BarPosition.End, index: this.currentIndex }) {
-        TabContent() {
-          HomePage()
-        }
-        .tabBar(this.TabBuilder('首页', 0, $r('app.media.ic_home_normal'), $r('app.media.ic_home_selected')))
+      Stack({ alignContent: Alignment.Bottom }) {
+        Tabs({ barPosition: BarPosition.End, index: this.currentIndex }) {
+          TabContent() {
+            HomePage()
+          }
+          .tabBar(this.TabBuilder('首页', 0, $r('app.media.ic_home_normal'), $r('app.media.ic_home_selected')))
 
-        TabContent() {
-          StatsPage()
-        }
-        .tabBar(this.TabBuilder('统计', 1, $r('app.media.ic_stats_normal'), $r('app.media.ic_stats_selected')))
+          TabContent() {
+            StatsPage()
+          }
+          .tabBar(this.TabBuilder('统计', 1, $r('app.media.ic_stats_normal'), $r('app.media.ic_stats_selected')))
 
-        TabContent() {
-          ToolsPage()
-        }
-        .tabBar(this.TabBuilder('急救', 2, $r('app.media.ic_home_normal'), $r('app.media.ic_home_selected')))
+          // Placeholder Tab for "+" button
+          TabContent() {
+            Column() // Empty content
+          }
+          .tabBar(this.PlaceholderTabBuilder())
+          .enabled(false) // Disable interaction
 
-        TabContent() {
-          SettingsPage()
+          TabContent() {
+            ToolsPage()
+          }
+          .tabBar(this.TabBuilder('急救', 3, $r('app.media.ic_home_normal'), $r('app.media.ic_home_selected')))
+
+          TabContent() {
+            SettingsPage()
+          }
+          .tabBar(this.TabBuilder('设置', 4, $r('app.media.ic_settings_normal'), $r('app.media.ic_settings_selected')))
         }
-        .tabBar(this.TabBuilder('设置', 3, $r('app.media.ic_settings_normal'), $r('app.media.ic_settings_selected')))
+        .scrollable(false)
+        .onChange((index: number) => {
+          this.currentIndex = index;
+        })
+        .barHeight(56)
+        .backgroundColor(Color.White)
+
+        // Floating "+" Button
+        Button({ type: ButtonType.Circle, stateEffect: true }) {
+          Text('+')
+            .fontSize(32)
+            .fontColor(Color.White)
+            .fontWeight(FontWeight.Lighter)
+            .margin({ bottom: 4 }) // Visual adjustment
+        }
+        .width(56)
+        .height(56)
+        .backgroundColor(CommonConstants.COLOR_PRIMARY)
+        .shadow({ radius: 8, color: 'rgba(0,0,0,0.2)', offsetY: 4 })
+        .margin({ bottom: 12 }) // Lift up from bottom
+        .onClick(() => {
+          this.pageStack.pushPath({ name: CommonConstants.URL_EDITOR } as NavPathInfo);
+        })
       }
-      .scrollable(false)
-      .onChange((index: number) => {
-        this.currentIndex = index;
-      })
-      .barHeight(56)
-      .backgroundColor(Color.White)
     }
     .mode(NavigationMode.Stack)
     .titleMode(NavigationTitleMode.Mini)

@@ -121,21 +121,39 @@ export struct HomePage {
             .fontColor(CommonConstants.COLOR_PRIMARY)
             .margin({ right: 8 })
           
-          // Placeholder icon
-          Circle({ width: 8, height: 8 }).fill(CommonConstants.COLOR_SECONDARY)
+          // Date Picker Trigger
+          Text('∨')
+            .fontSize(16)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(CommonConstants.COLOR_SECONDARY)
         }
+        .onClick(() => {
+          DatePickerDialog.show({
+            start: new Date("2020-1-1"),
+            end: new Date("2100-12-31"),
+            selected: new Date(this.currentYear, this.currentMonth),
+            showTime: false,
+            useMilitaryTime: false,
+            onDateAccept: (value: Date) => {
+              this.currentYear = value.getFullYear();
+              this.currentMonth = value.getMonth();
+              this.refreshData();
+            }
+          })
+        })
         
         Blank()
         
         Button({ type: ButtonType.Circle, stateEffect: true }) {
-          // Search icon placeholder
-           Circle({ width: 20, height: 20 }).fill(Color.Transparent).border({ width: 2, color: CommonConstants.COLOR_SECONDARY })
+           Text('🔍')
+             .fontSize(20)
+             .fontColor(CommonConstants.COLOR_PRIMARY)
         }
         .width(40)
         .height(40)
         .backgroundColor(Color.White)
         .onClick(() => {
-          // Search or other action
+          this.pageStack.pushPath({ name: CommonConstants.URL_SEARCH } as NavPathInfo);
         })
       }
       .width('100%')
