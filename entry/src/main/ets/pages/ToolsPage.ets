@@ -1,6 +1,7 @@
 import { CommonConstants } from '../common/constants/CommonConstants';
 import { promptAction, curves } from '@kit.ArkUI';
 import { vibrator } from '@kit.SensorServiceKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 interface Quote {
   text: string;
@@ -9,16 +10,21 @@ interface Quote {
 
 @Component
 export struct ToolsPage {
-  // Breathing State
+  // --- Breathing State ---
   @State breathingState: 'Idle' | 'Inhale' | 'Hold' | 'Exhale' = 'Idle';
   @State breathScale: number = 1.0;
   @State breathText: string = '点击开始';
-  
-  // Bubble Wrap State
-  @State isBubbleGameOpen: boolean = false;
-  @State bubbles: boolean[] = Array(30).fill(false); // Increased to 30
+  @State breathColor: ResourceColor = '#DBEAFE'; // Default: Blue-100
+  private timerIds: number[] = [];
 
-  // Quote State
+  // --- 2048 Game State ---
+  @State isGame2048Open: boolean = false;
+  @State board: number[] = Array(16).fill(0);
+  @State score: number = 0;
+  @State bestScore: number = 0;
+  @State isGameOver: boolean = false;
+
+  // --- Quote State ---
   @State currentQuote: Quote = {
     text: '万物皆有裂痕，那是光照进来的地方。',
     author: '莱昂纳德·科恩'
@@ -31,6 +37,15 @@ export struct ToolsPage {
     { text: '世界上只有一种英雄主义，就是在认清生活真相之后依然热爱生活。', author: '罗曼·罗兰' },
     { text: '慢下来，你并没有落后。', author: '佚名' }
   ];
+
+  aboutToDisappear(): void {
+    this.clearAllTimers();
+    try {
+      vibrator.stopVibration();
+    } catch (e) {
+      // Ignore
+    }
+  }
 
   build() {
     Column() {
@@ -52,8 +67,9 @@ export struct ToolsPage {
           // Tools Grid
           Grid() {
             GridItem() {
-              this.ToolCard('捏泡泡', '解压小游戏', '#FCE7F3', '👆', () => {
-                this.isBubbleGameOpen = true;
+              this.ToolCard('2048', '数字益智', '#FCE7F3', '🧩', () => {
+                this.initGame2048();
+                this.isGame2048Open = true;
               })
             }
             
@@ -90,12 +106,12 @@ export struct ToolsPage {
           .columnsTemplate('1fr 1fr')
           .columnsGap(12)
           .rowsGap(12)
-          .height(280) // Slightly reduced height
+          .height(280)
 
-          // Quote Card (Compact & Redesigned)
+          // Quote Card
           this.QuoteCard()
           
-          // Bottom Padding for safe area
+          // Bottom Padding
           Blank().height(80)
         }
         .padding({ left: 24, right: 24 })
@@ -106,79 +122,117 @@ export struct ToolsPage {
     .width('100%')
     .height('100%')
     .backgroundColor(CommonConstants.COLOR_BG)
-    .bindSheet($$this.isBubbleGameOpen, this.BubbleGameBuilder(), {
-      height: SheetSize.MEDIUM,
+    .bindSheet($$this.isGame2048Open, this.Game2048Builder(), {
+      height: SheetSize.LARGE, // Use large for better game view
       dragBar: true,
-      backgroundColor: '#FFF1F2'
+      backgroundColor: '#FAF8EF', // 2048 classic bg color
+      onDisappear: () => {
+        // Optional: save state?
+      }
     })
   }
 
   // --- Breathing Exercise Logic ---
+  
+  private addTimer(id: number) {
+    this.timerIds.push(id);
+  }
+
+  private clearAllTimers() {
+    this.timerIds.forEach(id => clearTimeout(id));
+    this.timerIds = [];
+  }
+
   startBreathing(): void {
     if (this.breathingState !== 'Idle') {
       this.resetBreathing();
       return;
     }
-
-    this.runBreathingCycle();
+    this.performInhale();
   }
 
   resetBreathing(): void {
+    this.clearAllTimers();
     animateTo({ duration: 500, curve: curves.springMotion() }, () => {
       this.breathScale = 1.0;
+      this.breathColor = '#DBEAFE';
     });
     this.breathingState = 'Idle';
     this.breathText = '点击开始';
+    try {
+      vibrator.stopVibration();
+    } catch (e) {}
   }
 
-  runBreathingCycle(): void {
-    if (this.breathingState === 'Idle') {
-      // Inhale (4s)
-      this.breathingState = 'Inhale';
-      this.breathText = '吸气 (4s)';
-      animateTo({ duration: 4000, curve: Curve.EaseInOut }, () => {
-        this.breathScale = 1.5;
+  private performInhale() {
+    this.breathingState = 'Inhale';
+    this.breathText = '吸气 (4s)';
+    
+    // Haptic: Long vibration for inhale
+    try {
+      vibrator.startVibration({ type: 'time', duration: 2000 }, { id: 0, usage: 'unknown' });
+    } catch (e) {}
+
+    animateTo({ duration: 4000, curve: Curve.EaseInOut }, () => {
+      this.breathScale = 1.5;
+      this.breathColor = '#3B82F6'; // Blue-500
+    });
+
+    const id = setTimeout(() => {
+      if (this.breathingState === 'Idle') return;
+      this.performHold();
+    }, 4000);
+    this.addTimer(id);
+  }
+
+  private performHold() {
+    this.breathingState = 'Hold';
+    this.breathText = '憋气 (7s)';
+    
+    animateTo({ duration: 7000, curve: Curve.Linear }, () => {
+       this.breathColor = '#06B6D4'; // Cyan-500
+    });
+
+    const id = setTimeout(() => {
+      if (this.breathingState === 'Idle') return;
+      this.performExhale();
+    }, 7000);
+    this.addTimer(id);
+  }
+
+  private performExhale() {
+    this.breathingState = 'Exhale';
+    this.breathText = '呼气 (8s)';
+    
+    // Haptic: Pulse vibration
+    this.triggerExhaleVibration();
+
+    animateTo({ duration: 8000, curve: Curve.EaseInOut }, () => {
+      this.breathScale = 1.0;
+      this.breathColor = '#8B5CF6'; // Violet-500
+    });
+
+    const id = setTimeout(() => {
+      if (this.breathingState === 'Idle') return;
+      // Loop
+      this.performInhale();
+    }, 8000);
+    this.addTimer(id);
+  }
+
+  private triggerExhaleVibration() {
+      const durations = [100, 100, 100];
+      let delay = 0;
+      durations.forEach((d, index) => {
+          const tid = setTimeout(() => {
+              if (this.breathingState !== 'Exhale') return;
+              try {
+                vibrator.startVibration({ type: 'time', duration: d }, { id: 0, usage: 'unknown' });
+              } catch (e) {}
+          }, delay);
+          this.addTimer(tid);
+          delay += d + 200; // Interval
       });
-
-      setTimeout(() => {
-        if (this.breathingState === 'Idle') return;
-        
-        // Hold (7s)
-        this.breathingState = 'Hold';
-        this.breathText = '憋气 (7s)';
-        // No scale change, just hold
-        
-        setTimeout(() => {
-          if (this.breathingState === 'Idle') return;
-
-          // Exhale (8s)
-          this.breathingState = 'Exhale';
-          this.breathText = '呼气 (8s)';
-          animateTo({ duration: 8000, curve: Curve.EaseInOut }, () => {
-            this.breathScale = 1.0;
-          });
-
-          setTimeout(() => {
-            if (this.breathingState === 'Idle') return;
-            // Loop
-            this.runBreathingCycle();
-          }, 8000);
-
-        }, 7000);
-
-      }, 4000);
-    } else {
-      // Recursive entry logic (same as initial)
-       this.breathingState = 'Inhale';
-       this.breathText = '吸气 (4s)';
-       animateTo({ duration: 4000, curve: Curve.EaseInOut }, () => {
-         this.breathScale = 1.5;
-       });
-       // ... Timeouts are handled by the closure of the new cycle if I were to refactor, 
-       // but here I rely on the fact that runBreathingCycle sets state and triggers timeouts.
-       // Actually, the recursive call in line 164 handles the loop.
-       // The 'else' block here is not reachable if I always call from Idle or Loop.
-    }
   }
 
   @Builder
@@ -200,53 +254,59 @@ export struct ToolsPage {
         .width(150)
         .height(150)
         .borderRadius(75)
-        .backgroundColor('#DBEAFE')
-        .opacity(0.3)
+        .backgroundColor(this.breathColor) // Dynamic Color
+        .opacity(0.2)
         .scale({ x: this.breathScale, y: this.breathScale })
         .position({ x: '50%', y: '50%' })
-        .translate({ x: '-50%', y: '-50%' })
+        .translate({ x: -75, y: -75 }) // Center
+        .animation({ duration: 1000, curve: Curve.EaseInOut }) // Fallback animation
 
       // Content
       Column() {
-        // Icon
-        Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-          Text('💨') // Changed to Wind/Dash
-            .fontSize(24)
+        Row() {
+          Text('🫁')
+            .fontSize(28)
+            .margin({ right: 12 })
+          Column({ space: 4 }) {
+            Text('4-7-8 呼吸法')
+              .fontSize(18)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(CommonConstants.COLOR_PRIMARY)
+            Text('缓解焦虑，助眠放松')
+              .fontSize(14)
+              .fontColor(CommonConstants.COLOR_SECONDARY)
+          }
+          .alignItems(HorizontalAlign.Start)
         }
-        .width(48)
-        .height(48)
-        .borderRadius(24)
-        .backgroundColor('#DBEAFE')
-        .margin({ bottom: 16 })
+        .width('100%')
+        .margin({ bottom: 32 })
 
-        Text('4-7-8 呼吸法')
-          .fontSize(20)
+        // Status Text
+        Text(this.breathText)
+          .fontSize(32)
           .fontWeight(FontWeight.Bold)
-          .fontColor('#1E3A8A')
-          .margin({ bottom: 8 })
-        
-        Text(this.breathingState === 'Idle' ? '缓解焦虑，助眠放松。吸气4秒，憋气7秒，呼气8秒。' : this.breathText)
-          .fontSize(14)
-          .fontColor(this.breathingState === 'Idle' ? '#64748B' : '#3B82F6')
-          .fontWeight(this.breathingState === 'Idle' ? FontWeight.Normal : FontWeight.Bold)
-          .lineHeight(20)
-          .margin({ bottom: 20 })
+          .fontColor(CommonConstants.COLOR_PRIMARY)
           .animation({ duration: 300 })
+        
+        Text(this.breathingState === 'Idle' ? '点击开始练习' : '跟随圆圈节奏')
+          .fontSize(14)
+          .fontColor(CommonConstants.COLOR_SECONDARY)
+          .margin({ top: 8 })
 
-        Button(this.breathingState === 'Idle' ? '开始练习' : '停止练习')
+        // Control Button
+        Button(this.breathingState === 'Idle' ? '开始' : '停止')
           .backgroundColor(this.breathingState === 'Idle' ? '#3B82F6' : '#EF4444')
           .fontColor(Color.White)
-          .fontSize(14)
-          .fontWeight(FontWeight.Medium)
           .height(36)
-          .borderRadius(18)
+          .margin({ top: 24 })
           .onClick(() => {
             this.startBreathing();
           })
       }
-      .padding(24)
-      .alignItems(HorizontalAlign.Start)
       .width('100%')
+      .height('100%')
+      .padding(24)
+      .alignItems(HorizontalAlign.Center)
       
       // Decorative Icon
       Text('☁️')
@@ -258,42 +318,233 @@ export struct ToolsPage {
     .height(240)
   }
 
-  // --- Bubble Wrap Logic ---
-  @Builder
-  BubbleGameBuilder() {
-    Column() {
-      Text('捏泡泡')
-        .fontSize(18)
-        .fontWeight(FontWeight.Bold)
-        .margin({ top: 24, bottom: 24 })
-      
-      Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceEvenly }) {
-        ForEach(this.bubbles, (popped: boolean, index: number) => {
-          Circle()
-            .width(44)
-            .height(44)
-            .fill(popped ? '#FCE7F3' : '#EC4899')
-            .fillOpacity(popped ? 0.3 : 1.0)
-            .margin(8)
-            .onClick(() => {
-              if (!this.bubbles[index]) {
-                 this.bubbles[index] = true;
-                 try {
-                   vibrator.startVibration({ type: 'time', duration: 50 }, { id: 0, usage: 'touch' });
-                 } catch (err) {
-                   // Ignore if vibration fails
-                 }
-              } else {
-                 this.bubbles[index] = false; // Optional: Un-pop?
-              }
-            })
-            .animation({ duration: 200 })
-        })
+  // --- 2048 Game Logic ---
+
+  initGame2048() {
+    this.board = Array(16).fill(0);
+    this.score = 0;
+    this.isGameOver = false;
+    this.addRandomTile();
+    this.addRandomTile();
+  }
+
+  addRandomTile() {
+    let emptyIndices: number[] = [];
+    for (let i = 0; i < 16; i++) {
+      if (this.board[i] === 0) emptyIndices.push(i);
+    }
+    if (emptyIndices.length > 0) {
+      let randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      // 90% chance for 2, 10% chance for 4
+      this.board[randomIndex] = Math.random() < 0.9 ? 2 : 4;
+    }
+  }
+
+  getTileColor(value: number): string {
+    switch (value) {
+      case 2: return '#EEE4DA';
+      case 4: return '#EDE0C8';
+      case 8: return '#F2B179';
+      case 16: return '#F59563';
+      case 32: return '#F67C5F';
+      case 64: return '#F65E3B';
+      case 128: return '#EDCF72';
+      case 256: return '#EDCC61';
+      case 512: return '#EDC850';
+      case 1024: return '#EDC53F';
+      case 2048: return '#EDC22E';
+      default: return '#CDC1B4'; // 0 or others
+    }
+  }
+
+  getTileTextColor(value: number): string {
+    return value <= 4 ? '#776E65' : '#F9F6F2';
+  }
+
+  // Swipe Handlers
+  handleSwipe(direction: 'left' | 'right' | 'up' | 'down') {
+    if (this.isGameOver) return;
+
+    let moved = false;
+    let newBoard = [...this.board];
+    let newScore = this.score;
+
+    // Logic: 
+    // 1. Extract lines (rows for L/R, cols for U/D)
+    // 2. Process each line: Slide -> Merge -> Slide
+    // 3. Put back
+
+    for (let i = 0; i < 4; i++) {
+      let line: number[] = [];
+      let indices: number[] = [];
+
+      // Extract line
+      for (let j = 0; j < 4; j++) {
+        let index = 0;
+        if (direction === 'left') index = i * 4 + j;
+        else if (direction === 'right') index = i * 4 + (3 - j);
+        else if (direction === 'up') index = j * 4 + i;
+        else if (direction === 'down') index = (3 - j) * 4 + i;
+        
+        indices.push(index);
+        line.push(newBoard[index]);
       }
-      .padding(16)
+
+      // Process line
+      let filtered = line.filter(v => v !== 0);
+      let merged: number[] = [];
+      
+      for (let k = 0; k < filtered.length; k++) {
+        if (k + 1 < filtered.length && filtered[k] === filtered[k + 1]) {
+          let val = filtered[k] * 2;
+          merged.push(val);
+          newScore += val;
+          k++; // Skip next
+        } else {
+          merged.push(filtered[k]);
+        }
+      }
+
+      // Pad with zeros
+      while (merged.length < 4) merged.push(0);
+
+      // Check change and update
+      for (let j = 0; j < 4; j++) {
+        if (newBoard[indices[j]] !== merged[j]) {
+          moved = true;
+          newBoard[indices[j]] = merged[j];
+        }
+      }
+    }
+
+    if (moved) {
+      this.board = newBoard;
+      this.score = newScore;
+      if (this.score > this.bestScore) this.bestScore = this.score;
+      this.addRandomTile();
+      
+      // Simple Game Over Check (Board full)
+      if (!this.board.includes(0)) {
+        // TODO: Strict check (can move?)
+        // For now just assume if full, risk of game over. 
+        // Not setting isGameOver strictly to allow user to try if merges exist.
+      }
+    }
+  }
+
+  @Builder
+  Game2048Builder() {
+    Column() {
+      // Header
+      Row() {
+        Text('2048')
+          .fontSize(48)
+          .fontWeight(FontWeight.Bold)
+          .fontColor('#776E65')
+        
+        Blank()
+
+        Column() {
+          Text('SCORE')
+            .fontSize(12)
+            .fontWeight(FontWeight.Bold)
+            .fontColor('#EEE4DA')
+          Text(this.score.toString())
+            .fontSize(20)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(Color.White)
+        }
+        .backgroundColor('#BBADA0')
+        .padding({ left: 16, right: 16, top: 4, bottom: 4 })
+        .borderRadius(4)
+        .margin({ right: 8 })
+
+        Column() {
+          Text('BEST')
+            .fontSize(12)
+            .fontWeight(FontWeight.Bold)
+            .fontColor('#EEE4DA')
+          Text(this.bestScore.toString())
+            .fontSize(20)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(Color.White)
+        }
+        .backgroundColor('#BBADA0')
+        .padding({ left: 16, right: 16, top: 4, bottom: 4 })
+        .borderRadius(4)
+      }
+      .width('100%')
+      .padding({ left: 16, right: 16, top: 24, bottom: 24 })
+      .alignItems(VerticalAlign.Center)
+
+      // Game Board
+      Column() {
+        Grid() {
+          ForEach(this.board, (num: number, index: number) => {
+            GridItem() {
+              Stack() {
+                // Tile Background
+                Rect()
+                  .width('100%')
+                  .height('100%')
+                  .fill(this.getTileColor(num))
+                  .radius(4)
+                
+                // Tile Number
+                if (num > 0) {
+                  Text(num.toString())
+                    .fontSize(num > 512 ? 24 : 32)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor(this.getTileTextColor(num))
+                }
+              }
+            }
+          })
+        }
+        .columnsTemplate('1fr 1fr 1fr 1fr')
+        .rowsTemplate('1fr 1fr 1fr 1fr')
+        .columnsGap(10)
+        .rowsGap(10)
+        .width('100%')
+        .height('100%')
+      }
+      .width(340) // Fixed width for 4x4
+      .height(340)
+      .backgroundColor('#BBADA0')
+      .borderRadius(6)
+      .padding(10)
+      .gesture(
+        PanGesture({ direction: PanDirection.All })
+          .onActionEnd((event: GestureEvent) => {
+            if (Math.abs(event.offsetX) > Math.abs(event.offsetY)) {
+              // Horizontal
+              if (event.offsetX > 20) this.handleSwipe('right');
+              else if (event.offsetX < -20) this.handleSwipe('left');
+            } else {
+              // Vertical
+              if (event.offsetY > 20) this.handleSwipe('down');
+              else if (event.offsetY < -20) this.handleSwipe('up');
+            }
+          })
+      )
+
+      // Instructions
+      Text('滑动手指移动方块，相同数字合并')
+        .fontSize(14)
+        .fontColor('#776E65')
+        .margin({ top: 32 })
+      
+      Button('重新开始')
+        .backgroundColor('#8F7A66')
+        .fontColor(Color.White)
+        .margin({ top: 16 })
+        .onClick(() => {
+          this.initGame2048();
+        })
     }
     .width('100%')
     .height('100%')
+    .backgroundColor('#FAF8EF')
   }
 
   @Builder
