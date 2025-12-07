@@ -82,6 +82,18 @@
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto hide-scrollbar px-6 pb-24">
         
+        <!-- Streak Card -->
+        <div class="flex items-center gap-4 mb-6">
+            <div class="text-4xl">🔥</div>
+            <div>
+                <p class="text-xs text-secondary">连续记录</p>
+                <p class="text-2xl font-bold text-primary">12 天</p>
+            </div>
+            <div class="ml-auto bg-orange-100 text-orange-500 text-xs px-2 py-1 rounded-full font-bold">
+                本周全勤
+            </div>
+        </div>
+
         <!-- Weekly Trend -->
         <div class="bg-white rounded-3xl shadow-sm p-5 mb-6">
             <div class="flex justify-between items-center mb-4">
@@ -191,20 +203,27 @@
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-100 pb-6 pt-3 px-8 flex justify-between items-center z-50">
-        <a href="home.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+    <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-100 pb-6 pt-3 px-6 flex justify-between items-end z-50">
+        <a href="home.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors w-12">
             <i class="fas fa-home text-xl"></i>
             <span class="text-[10px] font-medium">首页</span>
         </a>
-        <a href="#" class="flex flex-col items-center gap-1 text-primary">
+        <a href="#" class="flex flex-col items-center gap-1 text-primary w-12">
             <i class="fas fa-chart-pie text-xl"></i>
             <span class="text-[10px] font-medium">统计</span>
         </a>
-        <a href="tools.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+
+        <div class="relative -top-5">
+             <a href="editor.html" class="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white shadow-lg text-2xl hover:scale-105 transition-transform border-4 border-[#FAFAF9]">
+                <i class="fas fa-plus"></i>
+            </a>
+        </div>
+
+        <a href="tools.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors w-12">
             <i class="fas fa-first-aid text-xl"></i>
             <span class="text-[10px] font-medium">急救</span>
         </a>
-        <a href="settings.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+        <a href="settings.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors w-12">
             <i class="fas fa-cog text-xl"></i>
             <span class="text-[10px] font-medium">设置</span>
         </a>

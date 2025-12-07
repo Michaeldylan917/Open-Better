@@ -55,13 +55,13 @@
         <!-- Other Tools Grid -->
         <div class="grid grid-cols-2 gap-4">
             
-            <!-- Bubble Wrap -->
+            <!-- 2048 Game -->
             <div class="glass-card rounded-2xl p-4 flex flex-col items-center text-center hover:bg-white transition cursor-pointer">
                 <div class="w-12 h-12 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center text-2xl mb-3">
-                    <i class="fas fa-hand-pointer"></i>
+                    <i class="fas fa-puzzle-piece"></i>
                 </div>
-                <h3 class="font-bold text-gray-800 text-sm">捏泡泡</h3>
-                <p class="text-xs text-gray-400 mt-1">解压小游戏</p>
+                <h3 class="font-bold text-gray-800 text-sm">2048</h3>
+                <p class="text-xs text-gray-400 mt-1">数字益智</p>
             </div>
 
             <!-- Daily Wisdom -->
@@ -102,20 +102,27 @@
     </div>
 
     <!-- Bottom Navigation Bar -->
-    <div class="h-20 bg-white/80 backdrop-blur-xl border-t border-gray-200 flex justify-between items-center px-8 pb-4 shrink-0 absolute bottom-0 w-full z-50">
-        <a href="home.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition">
+    <div class="h-20 bg-white/80 backdrop-blur-xl border-t border-gray-200 flex justify-between items-end px-6 pb-4 shrink-0 absolute bottom-0 w-full z-50">
+        <a href="home.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition w-12">
             <i class="fas fa-home text-xl"></i>
             <span class="text-[10px] font-medium">首页</span>
         </a>
-        <a href="stats.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition">
+        <a href="stats.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition w-12">
             <i class="fas fa-chart-pie text-xl"></i>
             <span class="text-[10px] font-medium">统计</span>
         </a>
-        <a href="#" class="flex flex-col items-center gap-1 text-gray-900">
+
+        <div class="relative -top-5">
+             <a href="editor.html" class="w-14 h-14 bg-gray-900 rounded-full flex items-center justify-center text-white shadow-lg text-2xl hover:scale-105 transition-transform border-4 border-[#F7F7F5]">
+                <i class="fas fa-plus"></i>
+            </a>
+        </div>
+
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-900 w-12">
             <i class="fas fa-first-aid text-xl"></i>
             <span class="text-[10px] font-medium">急救</span>
         </a>
-        <a href="settings.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition">
+        <a href="settings.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition w-12">
             <i class="fas fa-cog text-xl"></i>
             <span class="text-[10px] font-medium">设置</span>
         </a>
