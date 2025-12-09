@@ -3,9 +3,91 @@ import { MoodService } from '../services/MoodService';
 import { promptAction } from '@kit.ArkUI';
 import { fileIo } from '@kit.CoreFileKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { PreferencesUtil } from '../common/utils/PreferencesUtil';
+import { common, ConfigurationConstant } from '@kit.AbilityKit';
+
+const KEY_APP_LOCK = 'app_lock_enabled';
+const KEY_REMINDER_ENABLED = 'reminder_enabled';
+const KEY_REMINDER_TIME = 'reminder_time';
+const KEY_THEME_MODE = 'theme_mode';
+
+class SettingOptions {
+  isToggle?: boolean = false;
+  isOn?: boolean = false;
+  valueText?: string = '';
+  isDestructive?: boolean = false;
+  onClick?: () => void = () => {};
+  onToggleChange?: (isOn: boolean) => void = () => {};
+}
 
 @Component
 export struct SettingsPage {
+  @State isAppLockEnabled: boolean = false;
+  @State isReminderEnabled: boolean = false;
+  @State reminderTime: string = '21:00';
+  @State themeName: string = '默认 (Cream)';
+
+  async aboutToAppear() {
+    await PreferencesUtil.getInstance().init(getContext(this) as common.UIAbilityContext);
+    this.isAppLockEnabled = await PreferencesUtil.getInstance().getValue(KEY_APP_LOCK, false) as boolean;
+    this.isReminderEnabled = await PreferencesUtil.getInstance().getValue(KEY_REMINDER_ENABLED, false) as boolean;
+    this.reminderTime = await PreferencesUtil.getInstance().getValue(KEY_REMINDER_TIME, '21:00') as string;
+    
+    const themeMode = await PreferencesUtil.getInstance().getValue(KEY_THEME_MODE, 0) as number;
+    this.updateThemeName(themeMode);
+  }
+
+  private updateThemeName(mode: number) {
+    switch (mode) {
+      case 0: this.themeName = '默认 (Cream)'; break;
+      case 1: this.themeName = '樱花 (Sakura)'; break;
+      case 2: this.themeName = '午夜 (Midnight)'; break;
+    }
+  }
+
+  private async toggleAppLock(isOn: boolean) {
+    this.isAppLockEnabled = isOn;
+    await PreferencesUtil.getInstance().putValue(KEY_APP_LOCK, isOn);
+    if (isOn) {
+      promptAction.showToast({ message: '应用锁已开启' });
+    } else {
+      promptAction.showToast({ message: '应用锁已关闭' });
+    }
+  }
+
+  private async toggleReminder(isOn: boolean) {
+    this.isReminderEnabled = isOn;
+    await PreferencesUtil.getInstance().putValue(KEY_REMINDER_ENABLED, isOn);
+    if (isOn) {
+      promptAction.showToast({ message: `提醒已开启 (${this.reminderTime})` });
+    } else {
+      promptAction.showToast({ message: '提醒已关闭' });
+    }
+  }
+
+  private changeReminderTime() {
+    if (!this.isReminderEnabled) {
+      promptAction.showToast({ message: '请先开启提醒功能' });
+      return;
+    }
+
+    const parts = this.reminderTime.split(':');
+    const selectedTime = new Date();
+    selectedTime.setHours(parseInt(parts[0]), parseInt(parts[1]));
+
+    TimePickerDialog.show({
+      selected: selectedTime,
+      useMilitaryTime: true,
+      onAccept: async (value: TimePickerResult) => {
+        const hour = value.hour.toString().padStart(2, '0');
+        const minute = value.minute.toString().padStart(2, '0');
+        this.reminderTime = `${hour}:${minute}`;
+        await PreferencesUtil.getInstance().putValue(KEY_REMINDER_TIME, this.reminderTime);
+        promptAction.showToast({ message: `提醒时间已更新为 ${this.reminderTime}` });
+      }
+    });
+  }
+
   private exportData(): void {
     try {
       const data = MoodService.getInstance().exportData();
@@ -37,7 +119,16 @@ export struct SettingsPage {
         { text: '樱花 (Sakura)', color: '#FFB7B2' },
         { text: '午夜 (Midnight)', color: '#666666' }
       ]
-    }).then(data => {
+    }).then(async data => {
+      this.updateThemeName(data.index);
+      await PreferencesUtil.getInstance().putValue(KEY_THEME_MODE, data.index);
+      
+      let colorMode = ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT;
+      if (data.index === 2) { // Midnight
+        colorMode = ConfigurationConstant.ColorMode.COLOR_MODE_DARK;
+      }
+      getContext(this).getApplicationContext().setColorMode(colorMode);
+
       switch (data.index) {
         case 0: promptAction.showToast({ message: '已切换至 Cream 主题' }); break;
         case 1: promptAction.showToast({ message: '已切换至 Sakura 主题' }); break;
@@ -109,11 +200,32 @@ export struct SettingsPage {
             .margin({ bottom: 12, left: 8 })
 
           Column() {
-            this.SettingItem('应用锁', 'blue', true)
+            this.SettingItem('应用锁', 'blue', '🔒', { 
+              isToggle: true, 
+              isOn: this.isAppLockEnabled, 
+              onToggleChange: (isOn: boolean): void => {
+                this.toggleAppLock(isOn);
+              }
+            })
             Divider().color('#F9FAFB').margin({ left: 56 })
-            this.SettingItem('提醒', 'purple', false, '21:00')
+            
+            this.SettingItem('提醒', 'purple', '🔔', { 
+              isToggle: true, 
+              isOn: this.isReminderEnabled, 
+              valueText: this.reminderTime,
+              onToggleChange: (isOn: boolean): void => {
+                this.toggleReminder(isOn);
+              },
+              onClick: (): void => {
+                this.changeReminderTime();
+              }
+            })
             Divider().color('#F9FAFB').margin({ left: 56 })
-            this.SettingItem('主题', 'orange', false, '默认 (Cream)', false, () => this.showThemeDialog())
+            
+            this.SettingItem('主题', 'orange', '🎨', { 
+              valueText: this.themeName, 
+              onClick: (): void => this.showThemeDialog() 
+            })
           }
           .backgroundColor(CommonConstants.COLOR_CARD)
           .borderRadius(24)
@@ -129,9 +241,13 @@ export struct SettingsPage {
             .margin({ bottom: 12, left: 8 })
 
           Column() {
-            this.SettingItem('导出数据', 'green', false, '', false, () => this.exportData())
+            this.SettingItem('导出数据', 'green', '📤', { 
+              onClick: (): void => this.exportData() 
+            })
             Divider().color('#F9FAFB').margin({ left: 56 })
-            this.SettingItem('清除所有数据', 'red', false, '', true)
+            this.SettingItem('清除所有数据', 'red', '🗑️', { 
+              isDestructive: true 
+            })
           }
           .backgroundColor(CommonConstants.COLOR_CARD)
           .borderRadius(24)
@@ -154,13 +270,11 @@ export struct SettingsPage {
   }
 
   @Builder
-  SettingItem(title: string, colorTheme: string, isToggle: boolean, valueText: string = '', isDestructive: boolean = false, onClick?: () => void) {
+  SettingItem(title: string, colorTheme: string, icon: string, options: SettingOptions) {
     Row() {
       // Icon
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        // Placeholder for icon
-        Circle({ width: 12, height: 12 })
-          .fill(this.getColor(colorTheme))
+        Text(icon).fontSize(16)
       }
       .width(32)
       .height(32)
@@ -171,22 +285,25 @@ export struct SettingsPage {
       Text(title)
         .fontSize(14)
         .fontWeight(FontWeight.Bold)
-        .fontColor(isDestructive ? '#EF4444' : CommonConstants.COLOR_PRIMARY)
+        .fontColor(options.isDestructive ? '#EF4444' : CommonConstants.COLOR_PRIMARY)
       
       Blank()
 
-      if (isToggle) {
-        Toggle({ type: ToggleType.Switch, isOn: false })
-          .selectedColor(this.getColor(colorTheme))
-      } else if (valueText) {
-        Text(valueText)
+      if (options.valueText) {
+        Text(options.valueText)
           .fontSize(12)
           .fontColor(CommonConstants.COLOR_SECONDARY)
           .margin({ right: 8 })
-        
-        Text('>') // Chevron placeholder
-          .fontSize(12)
-          .fontColor(CommonConstants.COLOR_SECONDARY)
+      }
+
+      if (options.isToggle) {
+        Toggle({ type: ToggleType.Switch, isOn: options.isOn })
+          .selectedColor(this.getColor(colorTheme))
+          .onChange((isOn: boolean): void => {
+            if (options.onToggleChange) {
+              options.onToggleChange(isOn);
+            }
+          })
       } else {
         Text('>') // Chevron placeholder
           .fontSize(12)
@@ -196,8 +313,8 @@ export struct SettingsPage {
     .width('100%')
     .padding(16)
     .height(64)
-    .onClick(() => {
-      if (onClick) onClick();
+    .onClick((): void => {
+      if (options.onClick) options.onClick();
     })
   }
 
@@ -208,7 +325,7 @@ export struct SettingsPage {
       case 'orange': return '#F97316';
       case 'green': return '#10B981';
       case 'red': return '#EF4444';
-      default: return CommonConstants.COLOR_PRIMARY;
+      default: return CommonConstants.COLOR_PRIMARY_HEX;
     }
   }
 }

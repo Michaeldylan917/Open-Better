@@ -1,17 +1,28 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { PreferencesUtil } from '../common/utils/PreferencesUtil';
 
 const DOMAIN = 0x0000;
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
-    try {
-      this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
-    } catch (err) {
-      hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
-    }
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
+    
+    // Initialize Preferences and set theme
+    PreferencesUtil.getInstance().init(this.context).then(() => {
+      return PreferencesUtil.getInstance().getValue('theme_mode', 0);
+    }).then((themeMode) => {
+      const mode = themeMode as number;
+      let colorMode = ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT;
+      if (mode === 2) { // Midnight
+        colorMode = ConfigurationConstant.ColorMode.COLOR_MODE_DARK;
+      }
+      this.context.getApplicationContext().setColorMode(colorMode);
+      hilog.info(DOMAIN, 'testTag', 'Theme mode set to: %{public}d', mode);
+    }).catch((err: Error) => {
+      hilog.error(DOMAIN, 'testTag', 'Failed to init preferences or set theme. Cause: %{public}s', JSON.stringify(err));
+    });
   }
 
   onDestroy(): void {

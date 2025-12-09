@@ -1,8 +1,14 @@
 export class CommonConstants {
-  static readonly COLOR_BG = '#FAFAF9';
-  static readonly COLOR_CARD = '#FFFFFF';
-  static readonly COLOR_PRIMARY = '#333333';
-  static readonly COLOR_SECONDARY = '#8E8E93';
+  /**
+   * Application Colors (Themed)
+   */
+  static readonly COLOR_BG = $r('app.color.bg_primary');
+  static readonly COLOR_CARD = $r('app.color.card_bg');
+  static readonly COLOR_PRIMARY = $r('app.color.text_primary');
+  static readonly COLOR_SECONDARY = $r('app.color.text_secondary');
+  
+  // Hex fallbacks for specific string manipulations if needed
+  static readonly COLOR_PRIMARY_HEX = '#333333';
   
   static readonly PAGE_PADDING = 24;
   
