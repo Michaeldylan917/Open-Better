@@ -2,6 +2,8 @@ import { CommonConstants } from '../common/constants/CommonConstants';
 import { promptAction, curves } from '@kit.ArkUI';
 import { vibrator } from '@kit.SensorServiceKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { media } from '@kit.MediaKit';
+import { common } from '@kit.AbilityKit';
 
 interface Quote {
   text: string;
@@ -16,6 +18,10 @@ export struct ToolsPage {
   @State breathText: string = '点击开始';
   @State breathColor: ResourceColor = '#DBEAFE'; // Default: Blue-100
   private timerIds: number[] = [];
+
+  // --- White Noise State ---
+  @State isWhiteNoisePlaying: boolean = false;
+  private avPlayer: media.AVPlayer | undefined = undefined;
 
   // --- 2048 Game State ---
   @State isGame2048Open: boolean = false;
@@ -42,6 +48,7 @@ export struct ToolsPage {
 
   aboutToDisappear(): void {
     this.clearAllTimers();
+    this.releaseAVPlayer();
     try {
       vibrator.stopVibration();
     } catch (e) {
@@ -69,39 +76,63 @@ export struct ToolsPage {
           // Tools Grid
           Grid() {
             GridItem() {
-              this.ToolCard('2048', '数字益智', '#FCE7F3', '🧩', () => {
-                this.initGame2048();
-                this.isGame2048Open = true;
+              ToolCardItem({
+                title: '2048',
+                subtitle: '数字益智',
+                bgColor: '#FCE7F3',
+                emoji: '🧩',
+                action: () => {
+                  this.initGame2048();
+                  this.isGame2048Open = true;
+                }
               })
             }
             
             GridItem() {
-              this.ToolCard('治愈金句', '每日心灵慰藉', '#F3E8FF', '❞', (): void => this.refreshQuote())
-            }
-
-            GridItem() {
-              this.ToolCard('白噪音', '雨声, 森林...', '#DCFCE7', '🎵', (): void => {
-                promptAction.showToast({ message: '正在播放：雨声 (模拟)' });
+              ToolCardItem({
+                title: '治愈金句',
+                subtitle: '每日心灵慰藉',
+                bgColor: '#F3E8FF',
+                emoji: '❞',
+                action: () => this.refreshQuote()
               })
             }
 
             GridItem() {
-              this.ToolCard('紧急求助', '专业热线', '#FEE2E2', '📞', (): void => {
-                AlertDialog.show({
-                  title: '紧急求助',
-                  message: '是否拨打心理咨询热线？\n12345',
-                  primaryButton: {
-                    value: '取消',
-                    action: () => {}
-                  },
-                  secondaryButton: {
-                    value: '拨打',
-                    fontColor: '#EF4444',
-                    action: () => {
-                      promptAction.showToast({ message: '正在拨号...' });
+              ToolCardItem({
+                title: '白噪音',
+                subtitle: this.isWhiteNoisePlaying ? '正在播放: 雨声' : '雨声, 森林...',
+                bgColor: '#DCFCE7',
+                emoji: this.isWhiteNoisePlaying ? '⏸️' : '🎵',
+                action: () => {
+                  this.toggleWhiteNoise();
+                }
+              })
+            }
+
+            GridItem() {
+              ToolCardItem({
+                title: '紧急求助',
+                subtitle: '专业热线',
+                bgColor: '#FEE2E2',
+                emoji: '📞',
+                action: () => {
+                  AlertDialog.show({
+                    title: '紧急求助',
+                    message: '是否拨打心理咨询热线？\n12345',
+                    primaryButton: {
+                      value: '取消',
+                      action: () => {}
+                    },
+                    secondaryButton: {
+                      value: '拨打',
+                      fontColor: '#EF4444',
+                      action: () => {
+                        promptAction.showToast({ message: '正在拨号...' });
+                      }
                     }
-                  }
-                })
+                  })
+                }
               })
             }
           }
@@ -549,38 +580,6 @@ export struct ToolsPage {
     .backgroundColor('#FAF8EF')
   }
 
-  @Builder
-  ToolCard(title: string, subtitle: string, bgColor: string, emoji: string, action: () => void) {
-    Column() {
-      Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        Text(emoji)
-          .fontSize(24)
-      }
-      .width(48)
-      .height(48)
-      .borderRadius(24)
-      .backgroundColor(bgColor)
-      .margin({ bottom: 12 })
-
-      Text(title)
-        .fontSize(14)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(CommonConstants.COLOR_PRIMARY)
-        .margin({ bottom: 4 })
-      
-      Text(subtitle)
-        .fontSize(12)
-        .fontColor(CommonConstants.COLOR_SECONDARY)
-    }
-    .width('100%')
-    .height(140)
-    .backgroundColor(CommonConstants.COLOR_CARD)
-    .borderRadius(24)
-    .justifyContent(FlexAlign.Center)
-    .shadow({ radius: 4, color: 'rgba(0,0,0,0.05)', offsetY: 2 })
-    .onClick(action)
-  }
-
   // --- Quote Logic ---
   refreshQuote(): void {
     // Animate out
@@ -599,6 +598,109 @@ export struct ToolsPage {
         this.quoteScale = 1.0;
       });
     }, 300);
+  }
+
+  // --- White Noise Logic ---
+  private async initAVPlayer(): Promise<void> {
+    try {
+      if (this.avPlayer) return;
+      
+      this.avPlayer = await media.createAVPlayer();
+      console.info('AVPlayer created');
+      
+      this.avPlayer.on('stateChange', async (state: media.AVPlayerState, reason: media.StateChangeReason) => {
+        console.info(`AVPlayer state change: ${state}, reason: ${reason}`);
+        switch (state) {
+          case 'idle':
+            // Reset called, reload source
+            try {
+              const context = getContext(this) as common.UIAbilityContext;
+              const fileDescriptor = await context.resourceManager.getRawFd('rain.mp3');
+              console.info(`AVPlayer idle, loading fd: ${fileDescriptor.fd}, offset: ${fileDescriptor.offset}, length: ${fileDescriptor.length}`);
+              this.avPlayer!.fdSrc = fileDescriptor;
+            } catch (err) {
+              console.error(`Failed to load rawfile in idle state: ${JSON.stringify(err)}`);
+            }
+            break;
+          case 'initialized':
+            console.info('AVPlayer initialized, preparing...');
+            this.avPlayer!.prepare();
+            break;
+          case 'prepared':
+            console.info('AVPlayer prepared, starting playback...');
+            this.avPlayer!.loop = true;
+            this.avPlayer!.play();
+            break;
+          case 'playing':
+            console.info('AVPlayer playing');
+            this.isWhiteNoisePlaying = true;
+            break;
+          case 'paused':
+            console.info('AVPlayer paused');
+            this.isWhiteNoisePlaying = false;
+            break;
+          case 'stopped':
+            console.info('AVPlayer stopped');
+            this.isWhiteNoisePlaying = false;
+            break;
+          case 'completed':
+            console.info('AVPlayer completed');
+            this.isWhiteNoisePlaying = false;
+            break;
+          case 'error':
+            console.error('AVPlayer error state');
+            this.isWhiteNoisePlaying = false;
+            break;
+        }
+      });
+      
+      this.avPlayer.on('error', (err) => {
+         console.error(`AVPlayer error event: ${JSON.stringify(err)}`);
+         this.isWhiteNoisePlaying = false;
+      });
+      
+      // Initial trigger
+      const context = getContext(this) as common.UIAbilityContext;
+      try {
+        const fileDescriptor = await context.resourceManager.getRawFd('rain.mp3');
+        console.info(`Initial load fd: ${fileDescriptor.fd}, offset: ${fileDescriptor.offset}, length: ${fileDescriptor.length}`);
+        this.avPlayer.fdSrc = fileDescriptor;
+      } catch (err) {
+        console.error(`Failed to get rawFd: ${JSON.stringify(err)}`);
+        promptAction.showToast({ message: '音频文件加载失败' });
+      }
+      
+    } catch (e) {
+      console.error(`Failed to init player: ${e.message}`);
+    }
+  }
+
+  private async toggleWhiteNoise(): Promise<void> {
+    if (!this.avPlayer) {
+      console.info('Initializing AVPlayer from toggle');
+      await this.initAVPlayer();
+    } else {
+       console.info(`Toggling white noise, current state: ${this.avPlayer.state}`);
+       if (this.avPlayer.state === 'playing') {
+         await this.avPlayer.pause();
+       } else if (this.avPlayer.state === 'paused' || this.avPlayer.state === 'prepared' || this.avPlayer.state === 'stopped') {
+         await this.avPlayer.play();
+       } else {
+         console.info('Resetting AVPlayer');
+         await this.avPlayer.reset();
+         // The 'idle' state handler will reload the source
+       }
+    }
+  }
+
+  private async releaseAVPlayer(): Promise<void> {
+    if (this.avPlayer) {
+      try {
+        await this.avPlayer.release();
+      } catch (e) {}
+      this.avPlayer = undefined;
+      this.isWhiteNoisePlaying = false;
+    }
   }
 
   @Builder
@@ -639,5 +741,47 @@ export struct ToolsPage {
     .opacity(this.quoteOpacity)
     .scale({ x: this.quoteScale, y: this.quoteScale })
     .onClick(() => this.refreshQuote())
+  }
+}
+
+@Component
+struct ToolCardItem {
+  @Prop title: string = '';
+  @Prop subtitle: string = '';
+  @Prop bgColor: string = '#FFFFFF';
+  @Prop emoji: string = '';
+  action: () => void = () => {};
+
+  build() {
+    Column() {
+      Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
+        Text(this.emoji)
+          .fontSize(24)
+      }
+      .width(48)
+      .height(48)
+      .borderRadius(24)
+      .backgroundColor(this.bgColor)
+      .margin({ bottom: 12 })
+
+      Text(this.title)
+        .fontSize(14)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(CommonConstants.COLOR_PRIMARY)
+        .margin({ bottom: 4 })
+      
+      Text(this.subtitle)
+        .fontSize(12)
+        .fontColor(CommonConstants.COLOR_SECONDARY)
+    }
+    .width('100%')
+    .height(140)
+    .backgroundColor(CommonConstants.COLOR_CARD)
+    .borderRadius(24)
+    .justifyContent(FlexAlign.Center)
+    .shadow({ radius: 4, color: 'rgba(0,0,0,0.05)', offsetY: 2 })
+    .onClick(() => {
+      this.action();
+    })
   }
 }
