@@ -2,6 +2,7 @@ import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.Ab
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { PreferencesUtil } from '../common/utils/PreferencesUtil';
+import { HMRouterMgr } from '@hadss/hmrouter';
 
 const DOMAIN = 0x0000;
 
@@ -9,6 +10,11 @@ export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
     
+    // Initialize HMRouter
+    HMRouterMgr.init({
+      context: this.context
+    });
+
     // Initialize Preferences and set theme
     PreferencesUtil.getInstance().init(this.context).then(() => {
       return PreferencesUtil.getInstance().getValue('theme_mode', 0);

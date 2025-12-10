@@ -6,10 +6,8 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { PreferencesUtil } from '../common/utils/PreferencesUtil';
 import { common, ConfigurationConstant } from '@kit.AbilityKit';
 
-const KEY_APP_LOCK = 'app_lock_enabled';
-const KEY_REMINDER_ENABLED = 'reminder_enabled';
-const KEY_REMINDER_TIME = 'reminder_time';
 const KEY_THEME_MODE = 'theme_mode';
+const URL_WIDGETS = 'pages/WidgetsPage'; // Placeholder if needed
 
 class SettingOptions {
   isToggle?: boolean = false;
@@ -22,16 +20,10 @@ class SettingOptions {
 
 @Component
 export struct SettingsPage {
-  @State isAppLockEnabled: boolean = false;
-  @State isReminderEnabled: boolean = false;
-  @State reminderTime: string = '21:00';
   @State themeName: string = '默认 (Cream)';
 
   async aboutToAppear() {
     await PreferencesUtil.getInstance().init(getContext(this) as common.UIAbilityContext);
-    this.isAppLockEnabled = await PreferencesUtil.getInstance().getValue(KEY_APP_LOCK, false) as boolean;
-    this.isReminderEnabled = await PreferencesUtil.getInstance().getValue(KEY_REMINDER_ENABLED, false) as boolean;
-    this.reminderTime = await PreferencesUtil.getInstance().getValue(KEY_REMINDER_TIME, '21:00') as string;
     
     const themeMode = await PreferencesUtil.getInstance().getValue(KEY_THEME_MODE, 0) as number;
     this.updateThemeName(themeMode);
@@ -43,49 +35,6 @@ export struct SettingsPage {
       case 1: this.themeName = '樱花 (Sakura)'; break;
       case 2: this.themeName = '午夜 (Midnight)'; break;
     }
-  }
-
-  private async toggleAppLock(isOn: boolean) {
-    this.isAppLockEnabled = isOn;
-    await PreferencesUtil.getInstance().putValue(KEY_APP_LOCK, isOn);
-    if (isOn) {
-      promptAction.showToast({ message: '应用锁已开启' });
-    } else {
-      promptAction.showToast({ message: '应用锁已关闭' });
-    }
-  }
-
-  private async toggleReminder(isOn: boolean) {
-    this.isReminderEnabled = isOn;
-    await PreferencesUtil.getInstance().putValue(KEY_REMINDER_ENABLED, isOn);
-    if (isOn) {
-      promptAction.showToast({ message: `提醒已开启 (${this.reminderTime})` });
-    } else {
-      promptAction.showToast({ message: '提醒已关闭' });
-    }
-  }
-
-  private changeReminderTime() {
-    if (!this.isReminderEnabled) {
-      promptAction.showToast({ message: '请先开启提醒功能' });
-      return;
-    }
-
-    const parts = this.reminderTime.split(':');
-    const selectedTime = new Date();
-    selectedTime.setHours(parseInt(parts[0]), parseInt(parts[1]));
-
-    TimePickerDialog.show({
-      selected: selectedTime,
-      useMilitaryTime: true,
-      onAccept: async (value: TimePickerResult) => {
-        const hour = value.hour.toString().padStart(2, '0');
-        const minute = value.minute.toString().padStart(2, '0');
-        this.reminderTime = `${hour}:${minute}`;
-        await PreferencesUtil.getInstance().putValue(KEY_REMINDER_TIME, this.reminderTime);
-        promptAction.showToast({ message: `提醒时间已更新为 ${this.reminderTime}` });
-      }
-    });
   }
 
   private exportData(): void {
@@ -177,13 +126,6 @@ export struct SettingsPage {
             }
             .alignItems(HorizontalAlign.Start)
             .layoutWeight(1)
-
-            Button('编辑')
-              .fontSize(12)
-              .fontColor(CommonConstants.COLOR_PRIMARY)
-              .backgroundColor(Color.Transparent)
-              .border({ width: 1, color: '#E5E7EB', radius: 16 })
-              .height(32)
           }
           .padding(20)
           .backgroundColor(CommonConstants.COLOR_CARD)
@@ -200,29 +142,10 @@ export struct SettingsPage {
             .margin({ bottom: 12, left: 8 })
 
           Column() {
-            this.SettingItem('应用锁', 'blue', '🔒', { 
-              isToggle: true, 
-              isOn: this.isAppLockEnabled, 
-              onToggleChange: (isOn: boolean): void => {
-                this.toggleAppLock(isOn);
-              }
-            })
+            this.WidgetGalleryItem()
             Divider().color('#F9FAFB').margin({ left: 56 })
             
-            this.SettingItem('提醒', 'purple', '🔔', { 
-              isToggle: true, 
-              isOn: this.isReminderEnabled, 
-              valueText: this.reminderTime,
-              onToggleChange: (isOn: boolean): void => {
-                this.toggleReminder(isOn);
-              },
-              onClick: (): void => {
-                this.changeReminderTime();
-              }
-            })
-            Divider().color('#F9FAFB').margin({ left: 56 })
-            
-            this.SettingItem('主题', 'orange', '🎨', { 
+            this.SettingItem('主题', 'pink', '🎨', { 
               valueText: this.themeName, 
               onClick: (): void => this.showThemeDialog() 
             })
@@ -267,6 +190,72 @@ export struct SettingsPage {
     .width('100%')
     .height('100%')
     .backgroundColor(CommonConstants.COLOR_BG)
+  }
+
+  @Builder
+  WidgetGalleryItem() {
+    Row() {
+      // Left side: Icon + Title + Badge
+      Row() {
+        // Icon
+        Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
+          Text('🧩').fontSize(16) // Layer icon placeholder
+        }
+        .width(32)
+        .height(32)
+        .borderRadius(16)
+        .backgroundColor('#FFF7ED') // Orange-50 equivalent
+        .margin({ right: 12 })
+
+        Text('小组件画廊')
+          .fontSize(14)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(CommonConstants.COLOR_PRIMARY)
+          .margin({ right: 8 })
+        
+        Text('New')
+          .fontSize(10)
+          .fontColor('#6B7280') // Gray-500
+          .backgroundColor('#F3F4F6') // Gray-100
+          .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+          .borderRadius(10)
+      }
+
+      Blank()
+
+      // Right side: Mini Widget Preview
+      Row({ space: 4 }) {
+        // Mini Widget 1 (Sun)
+        Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
+          Text('☀️').fontSize(10)
+        }
+        .width(24)
+        .height(24)
+        .borderRadius(6)
+        .backgroundColor('rgba(255, 183, 178, 0.2)') // Happy/20
+        .border({ width: 1, color: 'rgba(255, 183, 178, 0.3)' })
+
+        // Mini Widget 2 (Cloud)
+        Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
+          Text('☁️').fontSize(10)
+        }
+        .width(24)
+        .height(24)
+        .borderRadius(6)
+        .backgroundColor('rgba(181, 234, 215, 0.2)') // Sad/20
+        .border({ width: 1, color: 'rgba(181, 234, 215, 0.3)' })
+      }
+      .opacity(0.8)
+    }
+    .width('100%')
+    .padding(16)
+    .height(64)
+    .onClick(() => {
+      // Navigate to Widgets Page
+      // Since WidgetsPage might not exist or configured, just show toast for now
+      // or try to push path if using Navigation
+      promptAction.showToast({ message: '即将推出: 小组件画廊' });
+    })
   }
 
   @Builder
