@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拾光日签 - 小组件</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        bg: '#FAFAF9',
+                        card: '#FFFFFF',
+                        primary: '#333333',
+                        secondary: '#8E8E93',
+                        'mood-ecstatic': '#FFD166',
+                        'mood-happy': '#FFB7B2',
+                        'mood-neutral': '#E2F0CB',
+                        'mood-sad': '#B5EAD7',
+                        'mood-angry': '#FF9AA2',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Quicksand', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        .widget-card {
+            background: #FFFFFF;
+            border: 1px solid #F3F4F6;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        
+        .widget-card-dark {
+            background: #333333;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-bg min-h-screen relative overflow-hidden flex flex-col text-primary">
+
+    <!-- Status Bar Area -->
+    <div class="h-12 w-full flex justify-between items-center px-6 pt-2 z-20 text-primary bg-bg">
+        <span class="font-medium">9:41</span>
+        <div class="flex gap-2 text-sm">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- Widgets Grid -->
+    <div class="relative z-10 px-6 pt-4 flex-1 flex flex-col gap-6 items-center overflow-y-auto pb-24">
+        
+        <!-- Header -->
+        <div class="w-full flex items-center justify-between mb-2">
+            <a href="settings.html" class="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-primary hover:bg-gray-50 transition">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </a>
+            <div class="text-center">
+                <h2 class="text-primary text-lg font-bold">小组件画廊</h2>
+                <p class="text-secondary text-xs">长按预览或添加到桌面</p>
+            </div>
+            <div class="w-10"></div> <!-- Spacer -->
+        </div>
+
+        <!-- 2x2 Widget (Small) -->
+        <div class="w-40 h-40 rounded-3xl widget-card p-4 flex flex-col justify-between relative overflow-hidden group hover:scale-105 transition duration-300">
+            <!-- Background Decoration -->
+            <div class="absolute inset-0 z-0 opacity-30 bg-gradient-to-br from-mood-happy/50 to-mood-neutral/50"></div>
+            
+            <div class="relative z-10 flex justify-between items-start">
+                <i class="fas fa-sun text-mood-ecstatic text-xs"></i>
+                <span class="text-[10px] font-medium text-secondary">12/08</span>
+            </div>
+            
+            <div class="relative z-10">
+                <p class="font-serif text-sm leading-tight text-primary font-medium">
+                    "我相信今天<br>会有好事发生。"
+                </p>
+            </div>
+            
+            <div class="relative z-10 flex justify-end">
+                <i class="fas fa-star text-[8px] text-secondary"></i>
+            </div>
+        </div>
+
+        <!-- 2x4 Widget (Medium) - Style 1 -->
+        <div class="w-full max-w-[340px] h-40 rounded-3xl widget-card flex overflow-hidden group hover:scale-105 transition duration-300">
+            <!-- Left: Info -->
+            <div class="w-1/3 bg-gray-50/50 p-4 flex flex-col justify-between border-r border-gray-100">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-primary">08</div>
+                    <div class="text-[10px] text-secondary uppercase">December</div>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <i class="fas fa-cloud-sun text-xl text-mood-sad"></i>
+                    <span class="text-[10px] text-secondary">22°C</span>
+                </div>
+            </div>
+            
+            <!-- Right: Quote -->
+            <div class="w-2/3 p-5 flex items-center justify-center relative bg-white">
+                <div class="absolute inset-0 bg-mood-neutral/10"></div>
+                <p class="font-serif text-lg leading-relaxed text-primary font-medium relative z-10 text-center">
+                    "我拥抱<br>每一个当下的自己。"
+                </p>
+            </div>
+        </div>
+
+        <!-- 2x4 Widget (Medium) - Style 2 (Dark) -->
+        <div class="w-full max-w-[340px] h-40 rounded-3xl widget-card-dark flex overflow-hidden group hover:scale-105 transition duration-300">
+             <div class="p-6 flex flex-col justify-center w-full relative">
+                 <div class="absolute top-4 right-4 flex items-center gap-2 text-xs text-white/60">
+                     <i class="fas fa-moon"></i>
+                     <span>晚安</span>
+                 </div>
+                 <h3 class="font-serif text-xl text-white mb-2">亲爱的,</h3>
+                 <p class="font-serif text-sm text-white/90 leading-relaxed">
+                     "愿你今晚做一个甜美的梦，放下所有的疲惫与担忧。"
+                 </p>
+             </div>
+        </div>
+
+        <!-- Add Button -->
+        <button class="mt-4 bg-primary text-white px-8 py-3 rounded-full text-sm font-medium shadow-lg hover:bg-gray-800 transition">
+            <i class="fas fa-plus mr-2"></i> 添加到主屏幕
+        </button>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-100 pb-6 pt-3 px-6 flex justify-between items-end z-30">
+        <a href="home.html" class="flex flex-col items-center gap-1 text-secondary hover:text-primary transition w-12">
+            <i class="fas fa-home text-xl"></i>
+            <span class="text-[10px] font-medium">首页</span>
+        </a>
+        <a href="stats.html" class="flex flex-col items-center gap-1 text-secondary hover:text-primary transition w-12">
+            <i class="fas fa-chart-pie text-xl"></i>
+            <span class="text-[10px] font-medium">统计</span>
+        </a>
+        
+        <div class="relative -top-5">
+             <a href="editor.html" class="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white shadow-lg text-2xl hover:scale-105 transition-transform border-4 border-bg">
+                <i class="fas fa-plus"></i>
+            </a>
+        </div>
+
+        <a href="tools.html" class="flex flex-col items-center gap-1 text-primary w-12">
+            <i class="fas fa-first-aid text-xl"></i>
+            <span class="text-[10px] font-medium">急救</span>
+        </a>
+        <a href="settings.html" class="flex flex-col items-center gap-1 text-secondary hover:text-primary transition w-12">
+            <i class="fas fa-user text-xl"></i>
+            <span class="text-[10px] font-medium">我的</span>
+        </a>
+    </nav>
+
+</body>
+</html>

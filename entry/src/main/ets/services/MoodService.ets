@@ -15,7 +15,7 @@ export class MoodService {
 
   private constructor() {
     // Initial dummy data for testing
-    this.initDummyData();
+    // this.initDummyData();
   }
 
   private initDummyData() {
@@ -23,37 +23,7 @@ export class MoodService {
     const yesterday = today - 86400000;
     const dayBefore = today - 86400000 * 2;
 
-    this.logs = [
-      {
-        id: '1',
-        timestamp: yesterday,
-        mood: MoodType.ECSTATIC,
-        note: '终于完成了项目的里程碑，和朋友去吃了火锅，超级满足！🍲✨',
-        tags: ['工作', '美食']
-      },
-      {
-        id: '2',
-        timestamp: dayBefore,
-        mood: MoodType.SAD,
-        note: '外面下了一整天的雨，心情也变得湿漉漉的。想家了。',
-        tags: ['家庭']
-      },
-      // Add conflict for today to test priority
-      {
-        id: '3',
-        timestamp: today - 3600000 * 4, // 4 hours ago
-        mood: MoodType.HAPPY,
-        note: '早上心情不错',
-        tags: ['生活']
-      },
-      {
-        id: '4',
-        timestamp: today, // Just now
-        mood: MoodType.ANGRY, // Angry should prioritize over Happy
-        note: '突然遇到一个Bug，很生气',
-        tags: ['工作']
-      }
-    ];
+    this.logs = [];
   }
 
   public static getInstance(): MoodService {
