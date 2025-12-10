@@ -4,6 +4,7 @@ import { ToolsPage } from './ToolsPage';
 import { SettingsPage } from './SettingsPage';
 import { MoodEditorPage } from './MoodEditorPage';
 import { SearchPage } from './SearchPage';
+import { WidgetsPage } from './WidgetsPage';
 import { CommonConstants } from '../common/constants/CommonConstants';
 
 @Entry
@@ -18,6 +19,8 @@ export struct Index {
       MoodEditorPage()
     } else if (name === CommonConstants.URL_SEARCH) {
       SearchPage()
+    } else if (name === CommonConstants.URL_WIDGETS) {
+      WidgetsPage()
     }
   }
 

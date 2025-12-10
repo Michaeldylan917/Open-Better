@@ -20,6 +20,7 @@ class SettingOptions {
 
 @Component
 export struct SettingsPage {
+  @Consume('pageStack') pageStack: NavPathStack;
   @State themeName: string = '默认 (Cream)';
 
   async aboutToAppear() {
@@ -252,9 +253,7 @@ export struct SettingsPage {
     .height(64)
     .onClick(() => {
       // Navigate to Widgets Page
-      // Since WidgetsPage might not exist or configured, just show toast for now
-      // or try to push path if using Navigation
-      promptAction.showToast({ message: '即将推出: 小组件画廊' });
+      this.pageStack.pushPath({ name: CommonConstants.URL_WIDGETS });
     })
   }
 
