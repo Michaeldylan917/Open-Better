@@ -16,7 +16,7 @@ export class PreferencesUtil {
     return PreferencesUtil.instance;
   }
 
-  async init(context: common.UIAbilityContext): Promise<void> {
+  async init(context: common.Context): Promise<void> {
     try {
       this.pref = await preferences.getPreferences(context, this.PREF_NAME);
       console.info('PreferencesUtil', 'Preferences initialized');

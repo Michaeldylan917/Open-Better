@@ -2,6 +2,8 @@ import { MoodLog } from '../models/MoodLog';
 import { MoodType } from '../models/MoodType';
 import { MOOD_PRIORITY, MOOD_SCORE } from '../common/constants/MoodConstants';
 import { DateUtils } from '../common/utils/DateUtils';
+import { PreferencesUtil } from '../common/utils/PreferencesUtil';
+import { Context } from '@kit.AbilityKit';
 
 export interface TagStat {
   tag: string;
@@ -18,12 +20,24 @@ export class MoodService {
     // this.initDummyData();
   }
 
-  private initDummyData() {
-    const today = new Date().getTime();
-    const yesterday = today - 86400000;
-    const dayBefore = today - 86400000 * 2;
+  public async init(context: Context): Promise<void> {
+    await PreferencesUtil.getInstance().init(context);
+    await this.loadLogs();
+  }
 
-    this.logs = [];
+  private async loadLogs(): Promise<void> {
+    const logsJson = await PreferencesUtil.getInstance().getValue('mood_logs', '[]') as string;
+    try {
+      this.logs = JSON.parse(logsJson);
+    } catch (e) {
+      console.error('MoodService', 'Failed to parse logs', e);
+      this.logs = [];
+    }
+  }
+
+  private async saveLogs(): Promise<void> {
+    const logsJson = JSON.stringify(this.logs);
+    await PreferencesUtil.getInstance().putValue('mood_logs', logsJson);
   }
 
   public static getInstance(): MoodService {
@@ -53,15 +67,17 @@ export class MoodService {
     return this.logs.find(log => log.id === id);
   }
 
-  public addLog(log: MoodLog): void {
+  public async addLog(log: MoodLog): Promise<void> {
     this.logs.push(log);
+    await this.saveLogs();
     this.notifyListeners();
   }
 
-  public updateLog(log: MoodLog): void {
+  public async updateLog(log: MoodLog): Promise<void> {
     const index = this.logs.findIndex(l => l.id === log.id);
     if (index !== -1) {
       this.logs[index] = log;
+      await this.saveLogs();
       this.notifyListeners();
     }
   }

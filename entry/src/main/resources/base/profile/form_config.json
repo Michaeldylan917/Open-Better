@@ -1,0 +1,24 @@
+{
+  "forms": [
+    {
+      "name": "MoodWidget",
+      "displayName": "Mood Log",
+      "description": "Show your latest mood log.",
+      "src": "./ets/widget/pages/MoodWidgetCard.ets",
+      "uiSyntax": "arkts",
+      "window": {
+        "designWidth": 720,
+        "autoDesignWidth": true
+      },
+      "colorMode": "auto",
+      "isDefault": true,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "10:30",
+      "updateDuration": 1,
+      "defaultDimension": "2*2",
+      "supportDimensions": [
+        "2*2"
+      ]
+    }
+  ]
+}

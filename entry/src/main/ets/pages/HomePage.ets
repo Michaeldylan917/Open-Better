@@ -71,7 +71,7 @@ export struct HomePage {
     const targetTime = targetDate.getTime();
     
     if (targetTime > today.getTime()) {
-      AlertDialog.show({
+      this.getUIContext().showAlertDialog({
         message: '不能记录未来的心情哦 ~',
         autoCancel: true,
         alignment: DialogAlignment.Bottom,
@@ -128,7 +128,7 @@ export struct HomePage {
             .fontColor(CommonConstants.COLOR_SECONDARY)
         }
         .onClick(() => {
-          DatePickerDialog.show({
+          this.getUIContext().showDatePickerDialog({
             start: new Date("2020-1-1"),
             end: new Date("2100-12-31"),
             selected: new Date(this.currentYear, this.currentMonth),

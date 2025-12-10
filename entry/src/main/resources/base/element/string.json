@@ -19,6 +19,14 @@
     {
       "name": "welcome_message",
       "value": "Welcome to Mood Diary"
+    },
+    {
+      "name": "MoodWidget_label",
+      "value": "心情小组件"
+    },
+    {
+      "name": "MoodWidget_desc",
+      "value": "显示最新的心情记录"
     }
   ]
 }

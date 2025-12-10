@@ -1,9 +1,34 @@
 import { CommonConstants } from '../common/constants/CommonConstants';
 import { promptAction } from '@kit.ArkUI';
+import { MoodService } from '../services/MoodService';
+import { MoodLog } from '../models/MoodLog';
+import { DateUtils } from '../common/utils/DateUtils';
+import { MOOD_ICONS, MOOD_LABELS } from '../models/MoodType';
+import { Want } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 @Component
 export struct WidgetsPage {
   @Consume('pageStack') pageStack: NavPathStack;
+  @State latestLog: MoodLog | undefined = undefined;
+  
+  private moodService: MoodService = MoodService.getInstance();
+
+  aboutToAppear() {
+    const logs = this.moodService.getLogs();
+    if (logs.length > 0) {
+      this.latestLog = logs[0];
+    }
+  }
+
+  private async addToDesktop() {
+    // Note: formProvider.requestPublishForm might not be available in all SDK versions or device types.
+    // Fallback to guiding the user.
+    this.getUIContext().getPromptAction().showToast({
+      message: '请返回桌面，长按空白处添加"拾光日签"小组件',
+      duration: 3000
+    });
+  }
 
   build() {
     NavDestination() {
@@ -73,7 +98,7 @@ export struct WidgetsPage {
             .type(ButtonType.Capsule)
             .shadow({ radius: 8, color: 'rgba(0,0,0,0.2)', offsetY: 4 })
             .onClick(() => {
-              promptAction.showToast({ message: '请在桌面长按添加小组件' });
+              this.addToDesktop();
             })
             .margin({ top: 16, bottom: 48 })
           }
@@ -99,21 +124,23 @@ export struct WidgetsPage {
       
       Column() {
         Row() {
-          Text('☀️')
+          Text(this.latestLog ? MOOD_ICONS[this.latestLog.mood] : '☀️')
             .fontSize(16)
-          Text('12/08')
+          Text(this.latestLog ? DateUtils.format(this.latestLog.timestamp, 'MM/dd') : '12/08')
             .fontSize(10)
             .fontColor(CommonConstants.COLOR_SECONDARY)
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
 
-        Text('"我相信今天\n会有好事发生。"')
+        Text(this.latestLog && this.latestLog.note ? `"${this.latestLog.note}"` : '"我相信今天\n会有好事发生。"')
           .fontSize(14)
           .fontColor(CommonConstants.COLOR_PRIMARY)
           .fontWeight(FontWeight.Medium)
           .margin({ top: 24 })
           .lineHeight(20)
+          .maxLines(3)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
         
         Blank()
         
@@ -145,20 +172,20 @@ export struct WidgetsPage {
       // Left: Info
       Column() {
         Column() {
-          Text('08')
+          Text(this.latestLog ? DateUtils.format(this.latestLog.timestamp, 'dd') : '08')
             .fontSize(24)
             .fontWeight(FontWeight.Bold)
             .fontColor(CommonConstants.COLOR_PRIMARY)
-          Text('DECEMBER')
+          Text(this.latestLog ? DateUtils.format(this.latestLog.timestamp, 'MM月') : 'DECEMBER')
             .fontSize(10)
             .fontColor(CommonConstants.COLOR_SECONDARY)
         }
         
         Column() {
-          Text('⛅')
+          Text(this.latestLog ? MOOD_ICONS[this.latestLog.mood] : '⛅')
             .fontSize(20)
-            .fontColor('#B5EAD7') // Sad color
-          Text('22°C')
+            // .fontColor('#B5EAD7') // Sad color - icons are text, color might not apply if it's emoji
+          Text(this.latestLog ? MOOD_LABELS[this.latestLog.mood] : '22°C')
             .fontSize(10)
             .fontColor(CommonConstants.COLOR_SECONDARY)
             .margin({ top: 4 })
@@ -174,12 +201,15 @@ export struct WidgetsPage {
 
       // Right: Quote
       Stack() {
-        Text('"我拥抱\n每一个当下的自己。"')
+        Text(this.latestLog && this.latestLog.note ? `"${this.latestLog.note}"` : '"我拥抱\n每一个当下的自己。"')
           .fontSize(16)
           .fontColor(CommonConstants.COLOR_PRIMARY)
           .fontWeight(FontWeight.Medium)
           .textAlign(TextAlign.Center)
           .lineHeight(24)
+          .maxLines(4)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .padding(8)
       }
       .width('67%')
       .height('100%')

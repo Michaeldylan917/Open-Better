@@ -24,7 +24,7 @@ export struct SettingsPage {
   @State themeName: string = '默认 (Cream)';
 
   async aboutToAppear() {
-    await PreferencesUtil.getInstance().init(getContext(this) as common.UIAbilityContext);
+    await PreferencesUtil.getInstance().init(this.getUIContext().getHostContext() as common.UIAbilityContext);
     
     const themeMode = await PreferencesUtil.getInstance().getValue(KEY_THEME_MODE, 0) as number;
     this.updateThemeName(themeMode);
@@ -41,7 +41,7 @@ export struct SettingsPage {
   private exportData(): void {
     try {
       const data = MoodService.getInstance().exportData();
-      const context = getContext(this);
+      const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
       const filesDir = context.filesDir;
       const path = filesDir + '/mood_diary_export.json';
       
@@ -49,20 +49,20 @@ export struct SettingsPage {
       fileIo.writeSync(file.fd, data);
       fileIo.closeSync(file);
       
-      promptAction.showToast({
+      this.getUIContext().getPromptAction().showToast({
         message: `数据已导出至: ${path}`,
         duration: 3000
       });
     } catch (error) {
       const err = error as BusinessError;
-      promptAction.showToast({
+      this.getUIContext().getPromptAction().showToast({
         message: `导出失败: ${err.message}`
       });
     }
   }
 
   private showThemeDialog(): void {
-    promptAction.showActionMenu({
+    this.getUIContext().getPromptAction().showActionMenu({
       title: '选择主题',
       buttons: [
         { text: '默认 (Cream)', color: '#333333' },
@@ -77,12 +77,12 @@ export struct SettingsPage {
       if (data.index === 2) { // Midnight
         colorMode = ConfigurationConstant.ColorMode.COLOR_MODE_DARK;
       }
-      getContext(this).getApplicationContext().setColorMode(colorMode);
+      (this.getUIContext().getHostContext() as common.UIAbilityContext).getApplicationContext().setColorMode(colorMode);
 
       switch (data.index) {
-        case 0: promptAction.showToast({ message: '已切换至 Cream 主题' }); break;
-        case 1: promptAction.showToast({ message: '已切换至 Sakura 主题' }); break;
-        case 2: promptAction.showToast({ message: '已切换至 Midnight 主题' }); break;
+        case 0: this.getUIContext().getPromptAction().showToast({ message: '已切换至 Cream 主题' }); break;
+        case 1: this.getUIContext().getPromptAction().showToast({ message: '已切换至 Sakura 主题' }); break;
+        case 2: this.getUIContext().getPromptAction().showToast({ message: '已切换至 Midnight 主题' }); break;
       }
     }).catch((err: Error) => {
       console.info('ActionMenu cancelled');

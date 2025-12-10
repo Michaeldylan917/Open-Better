@@ -117,7 +117,7 @@ export struct ToolsPage {
                 bgColor: '#FEE2E2',
                 emoji: '📞',
                 action: () => {
-                  AlertDialog.show({
+                  this.getUIContext().showAlertDialog({
                     title: '紧急求助',
                     message: '是否拨打心理咨询热线？\n12345',
                     primaryButton: {
@@ -128,7 +128,7 @@ export struct ToolsPage {
                       value: '拨打',
                       fontColor: '#EF4444',
                       action: () => {
-                        promptAction.showToast({ message: '正在拨号...' });
+                        this.getUIContext().getPromptAction().showToast({ message: '正在拨号...' });
                       }
                     }
                   })
@@ -186,7 +186,7 @@ export struct ToolsPage {
 
   resetBreathing(): void {
     this.clearAllTimers();
-    animateTo({ duration: 500, curve: curves.springMotion() }, () => {
+    this.getUIContext().animateTo({ duration: 500, curve: curves.springMotion() }, () => {
       this.breathScale = 1.0;
       this.breathColor = '#DBEAFE';
     });
@@ -206,7 +206,7 @@ export struct ToolsPage {
       vibrator.startVibration({ type: 'time', duration: 2000 }, { id: 0, usage: 'unknown' });
     } catch (e) {}
 
-    animateTo({ duration: 4000, curve: Curve.EaseInOut }, () => {
+    this.getUIContext().animateTo({ duration: 4000, curve: Curve.EaseInOut }, () => {
       this.breathScale = 1.5;
       this.breathColor = '#3B82F6'; // Blue-500
     });
@@ -222,7 +222,7 @@ export struct ToolsPage {
     this.breathingState = 'Hold';
     this.breathText = '憋气 (7s)';
     
-    animateTo({ duration: 7000, curve: Curve.Linear }, () => {
+    this.getUIContext().animateTo({ duration: 7000, curve: Curve.Linear }, () => {
        this.breathColor = '#06B6D4'; // Cyan-500
     });
 
@@ -240,7 +240,7 @@ export struct ToolsPage {
     // Haptic: Pulse vibration
     this.triggerExhaleVibration();
 
-    animateTo({ duration: 8000, curve: Curve.EaseInOut }, () => {
+    this.getUIContext().animateTo({ duration: 8000, curve: Curve.EaseInOut }, () => {
       this.breathScale = 1.0;
       this.breathColor = '#8B5CF6'; // Violet-500
     });
@@ -583,7 +583,7 @@ export struct ToolsPage {
   // --- Quote Logic ---
   refreshQuote(): void {
     // Animate out
-    animateTo({ duration: 300, curve: Curve.EaseOut }, () => {
+    this.getUIContext().animateTo({ duration: 300, curve: Curve.EaseOut }, () => {
       this.quoteOpacity = 0.0;
       this.quoteScale = 0.95;
     });
@@ -593,7 +593,7 @@ export struct ToolsPage {
       this.currentQuote = this.quotes[randomIndex];
       
       // Animate in
-      animateTo({ duration: 300, curve: Curve.EaseIn }, () => {
+      this.getUIContext().animateTo({ duration: 300, curve: Curve.EaseIn }, () => {
         this.quoteOpacity = 1.0;
         this.quoteScale = 1.0;
       });
@@ -614,7 +614,7 @@ export struct ToolsPage {
           case 'idle':
             // Reset called, reload source
             try {
-              const context = getContext(this) as common.UIAbilityContext;
+              const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
               const fileDescriptor = await context.resourceManager.getRawFd('rain.mp3');
               console.info(`AVPlayer idle, loading fd: ${fileDescriptor.fd}, offset: ${fileDescriptor.offset}, length: ${fileDescriptor.length}`);
               this.avPlayer!.fdSrc = fileDescriptor;
@@ -660,14 +660,14 @@ export struct ToolsPage {
       });
       
       // Initial trigger
-      const context = getContext(this) as common.UIAbilityContext;
+      const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
       try {
         const fileDescriptor = await context.resourceManager.getRawFd('rain.mp3');
         console.info(`Initial load fd: ${fileDescriptor.fd}, offset: ${fileDescriptor.offset}, length: ${fileDescriptor.length}`);
         this.avPlayer.fdSrc = fileDescriptor;
       } catch (err) {
         console.error(`Failed to get rawFd: ${JSON.stringify(err)}`);
-        promptAction.showToast({ message: '音频文件加载失败' });
+        this.getUIContext().getPromptAction().showToast({ message: '音频文件加载失败' });
       }
       
     } catch (e) {

@@ -251,9 +251,9 @@ export struct MoodEditorPage {
     .hideTitleBar(true)
   }
 
-  private saveLog() {
+  private async saveLog() {
     if (this.isEditMode) {
-      this.moodService.updateLog({
+      await this.moodService.updateLog({
         id: this.editingLogId,
         timestamp: this.currentTimestamp,
         mood: this.selectedMood,
@@ -261,7 +261,7 @@ export struct MoodEditorPage {
         tags: this.selectedTags
       });
     } else {
-      this.moodService.addLog({
+      await this.moodService.addLog({
         id: new Date().getTime().toString(),
         timestamp: this.currentTimestamp,
         mood: this.selectedMood,
