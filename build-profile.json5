@@ -1,12 +1,26 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storeFile": "E:/HuaWeiApp/MOOD/mood.p12",
+          "storePassword": "00000019EDFEA751D83202DF8715D8CC89BE5E6F108648F4D9D826C220270668A995060C1C4D14D0CD",
+          "keyAlias": "mood",
+          "keyPassword": "00000019928BE057DB815C247C86BDB46C1E4C994ADB41E6FF3F1580D4B8EDD1768588924FC6A1B291",
+          "signAlg": "SHA256withECDSA",
+          "profile": "E:/HuaWeiApp/MOOD/moodRelease.p7b",
+          "certpath": "E:/HuaWeiApp/MOOD/拾光日签.cer"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
         "signingConfig": "default",
         "targetSdkVersion": "6.0.1(21)",
-        "compatibleSdkVersion": "6.0.1(21)",
+        "compatibleSdkVersion": "5.0.5(17)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
