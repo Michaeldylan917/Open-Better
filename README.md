@@ -1,4 +1,4 @@
-<img width="1080" height="1920" alt="未命名的设计 (7)" src="https://github.com/user-attachments/assets/6aefb14d-bd87-440b-a765-589a3807b6c6" /># MoodJournalCalendar - 时光日签
+# MoodJournalCalendar - 时光日签
 
 这是一个基于 HarmonyOS ArkTS 开发的心情日记应用，帮助用户记录每天的心情、笔记和标签，并通过日历和图表进行回顾。
 
@@ -55,15 +55,8 @@ entry/src/main/ets/
 └── services/
     └── MoodService.ets   # 数据服务 (单例)
 ```
-<img width="1080" height="1920" alt="未命名的设计" src="https://github.com/user-attachments/assets/da17c8dd-42e2-4d3a-8607-6045b3cd5c30" />
-<img width="1080" height="1920" alt="未命名的设计 (7)" src="https://github.com/user-attachments/assets/9a1e19ac-af1a-445b-ba26-f8bd38ab9b4c" />
-<img width="1080" height="1920" alt="未命名的设计 (6)" src="https://github.com/user-attachments/assets/476c6d43-7439-4eed-9471-aa34980c0b48" />
-<img width="1080" height="1920" alt="未命名的设计 (5)" src="https://github.com/user-attachments/assets/6a6a4631-3258-4598-8eec-2aa2f64fb392" />
-<img width="1080" height="1920" alt="未命名的设计 (3)" src="https://github.com/user-attachments/assets/2bf59475-1670-439f-a5a2-d4dbc603862c" />
-<img width="1080" height="1920" alt="未命名的设计 (2)" src="https://github.com/user-attachments/assets/2ae3c222-3e43-495b-9279-aab4118fdd8f" />
-<img width="1080" height="1920" alt="未命名的设计 (1)" src="https://github.com/user-attachments/assets/05b50a5f-aa1b-4085-b9ff-64bd6f815bd0" />
-
-
+<img width="1080" height="1920" alt="未命名的设计" src="https://github.com/user-attachments/assets/da17c8dd-42e2-4d3a-8607-6045b3cd5c30" /><img width="1080" height="1920" alt="未命名的设计 (7)" src="https://github.com/user-attachments/assets/9a1e19ac-af1a-445b-ba26-f8bd38ab9b4c" /><img width="1080" height="1920" alt="未命名的设计 (6)" src="https://github.com/user-attachments/assets/476c6d43-7439-4eed-9471-aa34980c0b48" />
+<img width="1080" height="1920" alt="未命名的设计 (5)" src="https://github.com/user-attachments/assets/6a6a4631-3258-4598-8eec-2aa2f64fb392" /><img width="1080" height="1920" alt="未命名的设计 (3)" src="https://github.com/user-attachments/assets/2bf59475-1670-439f-a5a2-d4dbc603862c" /><img width="1080" height="1920" alt="未命名的设计 (2)" src="https://github.com/user-attachments/assets/2ae3c222-3e43-495b-9279-aab4118fdd8f" /><img width="1080" height="1920" alt="未命名的设计 (1)" src="https://github.com/user-attachments/assets/05b50a5f-aa1b-4085-b9ff-64bd6f815bd0" />
 ## 🚀 运行与调试
 
 1. 使用 **DevEco Studio** 打开项目。
